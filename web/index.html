@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Game Interface</title>
-    <link rel="stylesheet" href="/diddy/css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="main-container">
         
-        <!-- Top Bar with Coin Icon, Game Name, Level, and Per Tap Button -->
+        <!-- Top Bar with Coin Icon Image, Game Name, Level, and Per Tap Button -->
         <div class="top-bar">
-            <div class="coin-icon">💰</div>
+            <img src="img/coins.png" alt="Coins Icon" class="top-bar-coin-icon">
             <div class="top-bar-label">
                 <span class="game-name">$DIDDYPARTY</span>
                 <span class="level" id="level">Level 0</span>
@@ -22,18 +22,14 @@
             </div>
         </div>
 
-        <!-- Game Stats Section -->
+        <!-- Game Stats Section with SoloCoin Image -->
         <section class="game-stats">
-            <div class="coin-display">💰</div>
+            <img src="img/solocoin.png" alt="Solo Coin Icon" class="coin-display">
             <h1 class="text-number" id="score">0</h1>
         </section>
 
-        <!-- Character Icon Section with Pop Animation and Unique Class Name -->
-        <section class="character-container">
-            <div class="hexagon-outline character-button" onclick="increaseScore()">
-                <img src="images/Untitled design (17).png" alt="Character Icon" class="character-image" id="character-image">
-            </div>
-        </section>
+        <!-- Character Icon - Only Image is Clickable -->
+        <img src="img/Untitled design (17).png" alt="Character Icon" class="character-image" id="character-image" onclick="increaseScore()">
 
         <!-- Energy/Score Bar Section -->
         <section class="score-bar">
@@ -41,18 +37,41 @@
             <span id="energy">0 / 1,000,000</span>
         </section>
 
-        <!-- Currency Section -->
+        <!-- Currency Section with Coin Image -->
         <section class="currency">
-            <div class="dollar-icon">💲</div>
+            <img src="img/coin.png" alt="Coin Icon" class="coin-icon">
         </section>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript with Cooldown Logic -->
     <script>
         let score = 0;
         let level = 0;
         let energy = 0;
         let onCooldown = false;
+
+        const COOLDOWN_DURATION = 86400000; // 24 hours in milliseconds
+
+        // Function to check if the cooldown has expired
+        function checkCooldown() {
+            const cooldownTimestamp = localStorage.getItem("cooldownTimestamp");
+            if (cooldownTimestamp) {
+                const currentTime = Date.now();
+                if (currentTime - cooldownTimestamp < COOLDOWN_DURATION) {
+                    onCooldown = true;
+                    document.getElementById("energy").innerText = "Cooldown active";
+                } else {
+                    // Cooldown has expired
+                    onCooldown = false;
+                    localStorage.removeItem("cooldownTimestamp");
+                    energy = 0;
+                    document.getElementById("energy").innerText = "0 / 1,000,000";
+                }
+            }
+        }
+
+        // Run cooldown check on page load
+        checkCooldown();
 
         function increaseScore() {
             if (onCooldown) {
@@ -84,18 +103,18 @@
             if (energy >= 1000000) {
                 onCooldown = true;
                 document.getElementById('energy').innerText = "Cooldown active";
+                
+                // Set cooldown timestamp in localStorage
+                localStorage.setItem("cooldownTimestamp", Date.now());
+
                 setTimeout(() => {
                     onCooldown = false;
                     energy = 0;
                     document.getElementById('energy').innerText = "0 / 1,000,000";
-                }, 86400000); // 24 hours in milliseconds
+                    localStorage.removeItem("cooldownTimestamp"); // Remove cooldown after 24 hours
+                }, COOLDOWN_DURATION); // 24 hours
             }
         }
-
-        // JavaScript interaction example
-        document.querySelector('.character-button').addEventListener('click', () => {
-            console.log('Button clicked!');
-        });
     </script>
 </body>
 </html>
