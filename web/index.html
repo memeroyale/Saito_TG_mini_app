@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Game Interface</title>
+    <link rel="stylesheet" href="/diddy/css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        
+        <!-- Top Bar with Coin Icon, Game Name, Level, and Per Tap Button -->
+        <div class="top-bar">
+            <div class="coin-icon">💰</div>
+            <div class="top-bar-label">
+                <span class="game-name">$DIDDYPARTY</span>
+                <span class="level" id="level">Level 0</span>
+            </div>
+            <div class="per-tap-button">
+                <span>PER TAP</span>
+                <span>+9999</span>
+            </div>
+        </div>
+
+        <!-- Game Stats Section -->
+        <section class="game-stats">
+            <div class="coin-display">💰</div>
+            <h1 class="text-number" id="score">0</h1>
+        </section>
+
+        <!-- Character Icon Section with Pop Animation and Unique Class Name -->
+        <section class="character-container">
+            <div class="hexagon-outline character-button" onclick="increaseScore()">
+                <img src="images/Untitled design (17).png" alt="Character Icon" class="character-image" id="character-image">
+            </div>
+        </section>
+
+        <!-- Energy/Score Bar Section -->
+        <section class="score-bar">
+            <div class="lightning-icon">⚡</div>
+            <span id="energy">0 / 1,000,000</span>
+        </section>
+
+        <!-- Currency Section -->
+        <section class="currency">
+            <div class="dollar-icon">💲</div>
+        </section>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let score = 0;
+        let level = 0;
+        let energy = 0;
+        let onCooldown = false;
+
+        function increaseScore() {
+            if (onCooldown) {
+                alert("Cooldown active! Try again in 24 hours.");
+                return;
+            }
+
+            // Add pop animation class
+            const characterImage = document.getElementById("character-image");
+            characterImage.classList.add("pop-animation");
+
+            // Remove pop animation class after animation ends
+            setTimeout(() => {
+                characterImage.classList.remove("pop-animation");
+            }, 200); // Match the duration of the CSS animation
+
+            score += 9999;
+            energy += 9999;
+
+            document.getElementById('score').innerText = score;
+            document.getElementById('energy').innerText = `${energy} / 1,000,000`;
+
+            // Check if the score or energy has reached 1 million
+            if (score >= (level + 1) * 1000000) {
+                level++;
+                document.getElementById('level').innerText = `Level ${level}`;
+            }
+
+            if (energy >= 1000000) {
+                onCooldown = true;
+                document.getElementById('energy').innerText = "Cooldown active";
+                setTimeout(() => {
+                    onCooldown = false;
+                    energy = 0;
+                    document.getElementById('energy').innerText = "0 / 1,000,000";
+                }, 86400000); // 24 hours in milliseconds
+            }
+        }
+
+        // JavaScript interaction example
+        document.querySelector('.character-button').addEventListener('click', () => {
+            console.log('Button clicked!');
+        });
+    </script>
+</body>
+</html>
