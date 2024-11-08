@@ -1,5 +1,7 @@
 const saito = require('../../lib/saito/saito');
+const DiddyMain = require('./lib/main');
 const ModTemplate = require('../../lib/templates/modtemplate');
+const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 
 class Diddy extends ModTemplate {
 
@@ -15,6 +17,7 @@ class Diddy extends ModTemplate {
                 this.categories = 'Utilities Communications';
                 this.class = 'utility';
 
+		this.ui = null;
                 this.header = null;
                 return this;
         }
@@ -26,15 +29,20 @@ class Diddy extends ModTemplate {
 		//
 		// this runs whenever Saito is initialized regardless of what app they are using
 		//
+		this.ui = new DiddyMain(app, this);
+		this.header = new SaitoHeader(app, this);
 
+      		//this.addComponent(this.header);
+      		this.addComponent(this.ui);
 
 	}
 
-	render() {
+	async render() {
 
 		//
 		// this runs when the user views the page /diddy
 		//
+		super.render();
 
 	}
 
