@@ -37,6 +37,44 @@ class Diddy extends ModTemplate {
 
 	}
 
+
+
+        async onConfirmation(blk, tx, conf) {           
+
+                let txmsg = tx.returnMessage();
+
+console.log("into on confirmation: " + JSON.stringify(txmsg));
+
+                if (conf == 0) {
+                	if (txmsg.module === this.name) {
+                		if (txmsg.request === 'click') {
+					this.receiveClickTransaction(tx);
+				}
+			}
+		}
+	}
+
+        async createClickTransaction() {
+
+                let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+                newtx.msg = {
+                        module: this.name,
+                        request: "click",
+                };
+                await newtx.sign();
+                return newtx;
+        }
+
+	receiveClickTransaction(tx) {
+		console.log("#");
+		console.log("#");
+		console.log("# Recieved Click Tx");
+		console.log("# " + JSON.stringify(tx.returnMessage()));
+		console.log("#");
+		console.log("#");
+		console.log("received a click transaction...");
+	}
+
 	async render() {
 
 		//
