@@ -17,6 +17,8 @@ class Diddy extends ModTemplate {
                 this.categories = 'Utilities Communications';
                 this.class = 'utility';
 
+		this.diddy = { count : 0 };
+
 		this.ui = null;
                 this.header = null;
                 return this;
@@ -27,12 +29,11 @@ class Diddy extends ModTemplate {
 		super.initialize(app);
 
 		//
-		// this runs whenever Saito is initialized regardless of what app they are using
+		// updates this.diddy
 		//
-		this.ui = new DiddyMain(app, this);
-		this.header = new SaitoHeader(app, this);
+		this.load();
 
-      		//this.addComponent(this.header);
+		this.ui = new DiddyMain(app, this);
       		this.addComponent(this.ui);
 
 	}
@@ -41,14 +42,19 @@ class Diddy extends ModTemplate {
 
         async onConfirmation(blk, tx, conf) {           
 
+                let diddy_mod = this.app.modules.returnModule(this.name);
                 let txmsg = tx.returnMessage();
-
-console.log("into on confirmation: " + JSON.stringify(txmsg));
 
                 if (conf == 0) {
                 	if (txmsg.module === this.name) {
                 		if (txmsg.request === 'click') {
 					this.receiveClickTransaction(tx);
+					try {
+						let publickey = tx.from[0].publicKey;
+						diddy_mod.addOrUpdateRecords(publickey);						
+					} catch (err) {
+						console.log("Database Issues: " + JSON.stringify(err));
+					}
 				}
 			}
 		}
@@ -67,10 +73,8 @@ console.log("into on confirmation: " + JSON.stringify(txmsg));
 
 	receiveClickTransaction(tx) {
 		console.log("#");
-		console.log("#");
 		console.log("# Recieved Click Tx");
 		console.log("# " + JSON.stringify(tx.returnMessage()));
-		console.log("#");
 		console.log("#");
 		console.log("received a click transaction...");
 	}
@@ -84,6 +88,40 @@ console.log("into on confirmation: " + JSON.stringify(txmsg));
 
 	}
 
+	save() {
+		this.app.options.diddy = this.diddy;
+		this.app.storage.saveOptions();
+	}
+
+	load() {
+		if (this.app.options.diddy) {
+			this.diddy = this.app.options.diddy;
+		} else {
+			this.diddy = {
+				count : 0
+			};
+		}
+	}
+
+
+
+        async addOrUpdateRecords(publickey = '', count = 0) {
+
+		let sql, params, res;
+
+		// insert if does not exist
+                sql = `INSERT OR IGNORE INTO records (publickey) VALUES ($publickey)`;
+                params = { $publickey: publickey };
+                res = await this.app.storage.runDatabase(sql, params, 'diddy');
+
+		// then update
+                sql = `UPDATE records SET count = count+1 WHERE publickey LIKE BINARY "$publickey"`;
+                params = { $publickey: publickey };
+                res = await this.app.storage.runDatabase(sql, params, 'diddy');
+
+        }       
 }
+
+
 module.exports = Diddy;
 
