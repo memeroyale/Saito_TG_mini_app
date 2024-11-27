@@ -20,7 +20,8 @@ class Diddy extends ModTemplate {
 		this.diddy = { count : 0 };
 
 		this.ui = null;
-                this.header = null;
+                this.header = new SaitoHeader(this.app, this);
+
                 return this;
         }
 
