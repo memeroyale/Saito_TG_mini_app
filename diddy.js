@@ -25,6 +25,8 @@ class Diddy extends ModTemplate {
     initialize(app) {
         super.initialize(app);
 
+        console.log("Initializing Diddy module...");
+
         //
         // updates this.diddy
         //
@@ -36,19 +38,17 @@ class Diddy extends ModTemplate {
 
         // Add components to the app
         this.addComponent(this.ui);
+        console.log("UI component added.");
         this.addComponent(this.header); // Register the header as a component
+        console.log("Header component added.");
     }
 
     async render() {
         //
         // This runs when the user views the page /diddy
         //
+        console.log("Rendering Diddy module...");
         super.render();
-
-        // Explicitly render the header
-        if (this.header) {
-            this.header.render();
-        }
     }
 
     async onConfirmation(blk, tx, conf) {
@@ -85,7 +85,7 @@ class Diddy extends ModTemplate {
         console.log("# Received Click Tx");
         console.log("# " + JSON.stringify(tx.returnMessage()));
         console.log("#");
-        console.log("received a click transaction...");
+        console.log("Received a click transaction...");
     }
 
     save() {
@@ -94,6 +94,7 @@ class Diddy extends ModTemplate {
     }
 
     load() {
+        console.log("Loading Diddy module state...");
         if (this.app.options.diddy) {
             this.diddy = this.app.options.diddy;
         } else {
@@ -101,6 +102,7 @@ class Diddy extends ModTemplate {
                 count: 0
             };
         }
+        console.log("Loaded state:", this.diddy);
     }
 
     async addOrUpdateRecords(publickey = '', count = 0) {
