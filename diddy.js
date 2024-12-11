@@ -4,7 +4,6 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 
 class Diddy extends ModTemplate {
-
     constructor(app) {
         super(app);
 
@@ -16,7 +15,7 @@ class Diddy extends ModTemplate {
         this.categories = 'Utilities Communications';
         this.class = 'utility';
 
-        this.diddy = { count: 0 };
+        this.diddy = { count: 0, level: 1 }; // Only count and level are persistent
         this.ui = null;
 
         return this;
@@ -27,10 +26,11 @@ class Diddy extends ModTemplate {
 
         console.log("Initializing Diddy module...");
 
-        //
-        // updates this.diddy
-        //
+        // Load persistent state
         this.load();
+
+        // Ensure dynamic properties (like level) are recalculated
+        this.recalculateState();
 
         // Initialize components
         this.ui = new DiddyMain(app, this);
@@ -38,17 +38,49 @@ class Diddy extends ModTemplate {
 
         // Add components to the app
         this.addComponent(this.ui);
-        console.log("UI component added.");
-        this.addComponent(this.header); // Register the header as a component
-        console.log("Header component added.");
+        this.addComponent(this.header);
     }
 
-    async render() {
-        //
-        // This runs when the user views the page /diddy
-        //
-        console.log("Rendering Diddy module...");
-        super.render();
+    recalculateState() {
+        // Recalculate level based on count
+        this.diddy.level = Math.floor(this.diddy.count / 10) + 1; // Example: 10 taps per level
+        console.log(`Recalculated state: Count = ${this.diddy.count}, Level = ${this.diddy.level}`);
+    }
+
+    save() {
+        // Save count and level to persistent storage
+        console.log("Saving state:", this.diddy);
+        this.app.options.diddy = this.diddy;
+        this.app.storage.saveOptions();
+    }
+
+    load() {
+        console.log("Loading state...");
+        if (this.app.options.diddy) {
+            this.diddy = this.app.options.diddy; // Load the saved state
+        } else {
+            this.diddy = { count: 0, level: 1 }; // Default state
+        }
+
+        this.recalculateState(); // Recalculate level on load
+        console.log(`Loaded state: Count = ${this.diddy.count}, Level = ${this.diddy.level}`);
+    }
+
+    incrementTap() {
+        this.diddy.count += 1;
+        this.recalculateState();
+        console.log("Updated state:", this.diddy);
+        this.save(); // Save the new state
+    }
+
+    async createClickTransaction() {
+        let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+        newtx.msg = {
+            module: this.name,
+            request: "click",
+        };
+        await newtx.sign();
+        return newtx;
     }
 
     async onConfirmation(blk, tx, conf) {
@@ -70,51 +102,20 @@ class Diddy extends ModTemplate {
         }
     }
 
-    async createClickTransaction() {
-        let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-        newtx.msg = {
-            module: this.name,
-            request: "click",
-        };
-        await newtx.sign();
-        return newtx;
-    }
-
     receiveClickTransaction(tx) {
-        console.log("#");
-        console.log("# Received Click Tx");
-        console.log("# " + JSON.stringify(tx.returnMessage()));
-        console.log("#");
-        console.log("Received a click transaction...");
-    }
-
-    save() {
-        this.app.options.diddy = this.diddy;
-        this.app.storage.saveOptions();
-    }
-
-    load() {
-        console.log("Loading Diddy module state...");
-        if (this.app.options.diddy) {
-            this.diddy = this.app.options.diddy;
-        } else {
-            this.diddy = {
-                count: 0
-            };
-        }
-        console.log("Loaded state:", this.diddy);
+        console.log("# Received Click Transaction:", tx.returnMessage());
     }
 
     async addOrUpdateRecords(publickey = '', count = 0) {
         let sql, params, res;
 
-        // Insert if does not exist
+        // Insert if the record doesn't exist
         sql = `INSERT OR IGNORE INTO records (publickey) VALUES ($publickey)`;
         params = { $publickey: publickey };
         res = await this.app.storage.runDatabase(sql, params, 'diddy');
 
         // Then update
-        sql = `UPDATE records SET count = count+1 WHERE publickey LIKE BINARY "$publickey"`;
+        sql = `UPDATE records SET count = count + 1 WHERE publickey LIKE BINARY "$publickey"`;
         params = { $publickey: publickey };
         res = await this.app.storage.runDatabase(sql, params, 'diddy');
     }
