@@ -15,7 +15,8 @@ class Diddy extends ModTemplate {
         this.categories = 'Utilities Communications';
         this.class = 'utility';
 
-        this.diddy = { count: 0, level: 1 }; // Only count and level are persistent
+        // Add energy and timestamp to the persistent state
+        this.diddy = { count: 0, level: 1, energy: 100, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
         this.ui = null;
 
         return this;
@@ -29,7 +30,10 @@ class Diddy extends ModTemplate {
         // Load persistent state
         this.load();
 
-        // Ensure dynamic properties (like level) are recalculated
+        // Update energy based on elapsed time
+        this.updateEnergyFromElapsedTime();
+
+        // Ensure dynamic properties are recalculated
         this.recalculateState();
 
         // Initialize components
@@ -50,12 +54,43 @@ class Diddy extends ModTemplate {
             level++;
         }
 
+        // Update level
+        const previousLevel = this.diddy.level;
         this.diddy.level = level;
-        console.log(`Recalculated state: Count = ${count}, Level = ${level}`);
+
+        // Update maxEnergy and rechargeRate based on level
+        this.diddy.maxEnergy = 40 + (level - 1) * 20; // Level 1 = 40, Level 2 = 60, etc.
+        this.diddy.rechargeRate = 1 + (level - 1) * 0.1; // Level 1 = 1/s, Level 2 = 1.1/s, etc.
+
+        // If the user levels up, ensure energy is capped at the new maxEnergy
+        if (previousLevel !== level) {
+            this.diddy.energy = Math.min(this.diddy.energy, this.diddy.maxEnergy);
+        }
+
+        console.log(
+            `Recalculated state: Count = ${count}, Level = ${level}, Max Energy = ${this.diddy.maxEnergy}, Recharge Rate = ${this.diddy.rechargeRate}, Energy = ${this.diddy.energy}`
+        );
+    }
+
+    updateEnergyFromElapsedTime() {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - this.diddy.lastUpdated) / 1000);
+
+        if (elapsedSeconds > 0) {
+            // Calculate recharged energy
+            const rechargedEnergy = Math.floor(elapsedSeconds * this.diddy.rechargeRate);
+            this.diddy.energy = Math.min(this.diddy.energy + rechargedEnergy, this.diddy.maxEnergy);
+
+            console.log(`Recovered ${rechargedEnergy} energy from ${elapsedSeconds} seconds.`);
+        }
+
+        // Update lastUpdated timestamp
+        this.diddy.lastUpdated = now;
+        this.save();
     }
 
     save() {
-        // Save count and level to persistent storage
+        // Save count, level, energy, maxEnergy, and lastUpdated to persistent storage
         console.log("Saving state:", this.diddy);
         this.app.options.diddy = this.diddy;
         this.app.storage.saveOptions();
@@ -65,12 +100,18 @@ class Diddy extends ModTemplate {
         console.log("Loading state...");
         if (this.app.options.diddy) {
             this.diddy = this.app.options.diddy; // Load the saved state
+
+            // Ensure values are initialized properly
+            if (this.diddy.energy === undefined || isNaN(this.diddy.energy)) this.diddy.energy = 100;
+            if (this.diddy.maxEnergy === undefined || isNaN(this.diddy.maxEnergy)) this.diddy.maxEnergy = 100;
+            if (this.diddy.rechargeRate === undefined || isNaN(this.diddy.rechargeRate)) this.diddy.rechargeRate = 1;
+            if (this.diddy.lastUpdated === undefined || isNaN(this.diddy.lastUpdated)) this.diddy.lastUpdated = Date.now();
         } else {
-            this.diddy = { count: 0, level: 1 }; // Default state
+            // Default state - Fresh start
+            this.diddy = { count: 0, level: 1, energy: 100, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
         }
 
-        this.recalculateState(); // Recalculate level on load
-        console.log(`Loaded state: Count = ${this.diddy.count}, Level = ${this.diddy.level}`);
+        console.log(`Loaded state: ${JSON.stringify(this.diddy)}`);
     }
 
     incrementTap() {
