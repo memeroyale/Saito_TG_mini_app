@@ -42,9 +42,16 @@ class Diddy extends ModTemplate {
     }
 
     recalculateState() {
-        // Recalculate level based on count
-        this.diddy.level = Math.floor(this.diddy.count / 10) + 1; // Example: 10 taps per level
-        console.log(`Recalculated state: Count = ${this.diddy.count}, Level = ${this.diddy.level}`);
+        const count = this.diddy.count;
+
+        // Formula to calculate level based on count
+        let level = 1;
+        while (count >= 20 * level * level + 20 * level) {
+            level++;
+        }
+
+        this.diddy.level = level;
+        console.log(`Recalculated state: Count = ${count}, Level = ${level}`);
     }
 
     save() {
