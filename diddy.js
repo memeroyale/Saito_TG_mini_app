@@ -108,7 +108,7 @@ class Diddy extends ModTemplate {
             if (this.diddy.lastUpdated === undefined || isNaN(this.diddy.lastUpdated)) this.diddy.lastUpdated = Date.now();
         } else {
             // Default state - Fresh start
-            this.diddy = { count: 0, level: 1, energy: 100, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
+            this.diddy = { count: 0, level: 1, energy: 40, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
         }
 
         console.log(`Loaded state: ${JSON.stringify(this.diddy)}`);
