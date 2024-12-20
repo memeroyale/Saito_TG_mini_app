@@ -25,7 +25,7 @@ class Diddy extends ModTemplate {
     initialize(app) {
         super.initialize(app);
 
-        console.log("Initializing Diddy module...");
+        // console.log("Initializing Diddy module...");
 
         // Load persistent state
         this.load();
@@ -67,9 +67,9 @@ class Diddy extends ModTemplate {
             this.diddy.energy = Math.min(this.diddy.energy, this.diddy.maxEnergy);
         }
 
-        console.log(
-            `Recalculated state: Count = ${count}, Level = ${level}, Max Energy = ${this.diddy.maxEnergy}, Recharge Rate = ${this.diddy.rechargeRate}, Energy = ${this.diddy.energy}`
-        );
+        // console.log(
+        //     `Recalculated state: Count = ${count}, Level = ${level}, Max Energy = ${this.diddy.maxEnergy}, Recharge Rate = ${this.diddy.rechargeRate}, Energy = ${this.diddy.energy}`
+        // );
     }
 
     updateEnergyFromElapsedTime() {
@@ -81,7 +81,7 @@ class Diddy extends ModTemplate {
             const rechargedEnergy = Math.floor(elapsedSeconds * this.diddy.rechargeRate);
             this.diddy.energy = Math.min(this.diddy.energy + rechargedEnergy, this.diddy.maxEnergy);
 
-            console.log(`Recovered ${rechargedEnergy} energy from ${elapsedSeconds} seconds.`);
+            // console.log(`Recovered ${rechargedEnergy} energy from ${elapsedSeconds} seconds.`);
         }
 
         // Update lastUpdated timestamp
@@ -91,13 +91,13 @@ class Diddy extends ModTemplate {
 
     save() {
         // Save count, level, energy, maxEnergy, and lastUpdated to persistent storage
-        console.log("Saving state:", this.diddy);
+        // console.log("Saving state:", this.diddy);
         this.app.options.diddy = this.diddy;
         this.app.storage.saveOptions();
     }
 
     load() {
-        console.log("Loading state...");
+        // console.log("Loading state...");
         if (this.app.options.diddy) {
             this.diddy = this.app.options.diddy; // Load the saved state
 
@@ -111,13 +111,13 @@ class Diddy extends ModTemplate {
             this.diddy = { count: 0, level: 1, energy: 40, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
         }
 
-        console.log(`Loaded state: ${JSON.stringify(this.diddy)}`);
+        // console.log(`Loaded state: ${JSON.stringify(this.diddy)}`);
     }
 
     incrementTap() {
         this.diddy.count += 1;
         this.recalculateState();
-        console.log("Updated state:", this.diddy);
+        // console.log("Updated state:", this.diddy);
         this.save(); // Save the new state
     }
 
@@ -143,7 +143,7 @@ class Diddy extends ModTemplate {
                         let publickey = tx.from[0].publicKey;
                         diddy_mod.addOrUpdateRecords(publickey);
                     } catch (err) {
-                        console.log("Database Issues: " + JSON.stringify(err));
+                        // console.log("Database Issues: " + JSON.stringify(err));
                     }
                 }
             }
@@ -151,7 +151,7 @@ class Diddy extends ModTemplate {
     }
 
     receiveClickTransaction(tx) {
-        console.log("# Received Click Transaction:", tx.returnMessage());
+        // console.log("# Received Click Transaction:", tx.returnMessage());
     }
 
     async addOrUpdateRecords(publickey = '', count = 0) {
