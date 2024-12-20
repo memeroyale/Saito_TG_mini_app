@@ -16,7 +16,7 @@ class Diddy extends ModTemplate {
         this.class = 'utility';
 
         // Add energy and timestamp to the persistent state
-        this.diddy = { count: 0, level: 1, energy: 100, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
+        this.diddy = { count: 0, level: 1, energy: 40, maxEnergy: 40, rechargeRate: 0.2, lastUpdated: Date.now() };
         this.ui = null;
 
         return this;
@@ -59,8 +59,8 @@ class Diddy extends ModTemplate {
         this.diddy.level = level;
 
         // Update maxEnergy and rechargeRate based on level
-        this.diddy.maxEnergy = 40 + (level - 1) * 20; // Level 1 = 40, Level 2 = 60, etc.
-        this.diddy.rechargeRate = 1 + (level - 1) * 0.1; // Level 1 = 1/s, Level 2 = 1.1/s, etc.
+        this.diddy.maxEnergy = 40 + (level - 1) * 15; // Start at 40, scale more moderately
+        this.diddy.rechargeRate = 0.2 + (level - 1) * 0.07; // Start slightly faster, scale with level
 
         // If the user levels up, ensure energy is capped at the new maxEnergy
         if (previousLevel !== level) {
@@ -102,13 +102,13 @@ class Diddy extends ModTemplate {
             this.diddy = this.app.options.diddy; // Load the saved state
 
             // Ensure values are initialized properly
-            if (this.diddy.energy === undefined || isNaN(this.diddy.energy)) this.diddy.energy = 100;
-            if (this.diddy.maxEnergy === undefined || isNaN(this.diddy.maxEnergy)) this.diddy.maxEnergy = 100;
-            if (this.diddy.rechargeRate === undefined || isNaN(this.diddy.rechargeRate)) this.diddy.rechargeRate = 1;
+            if (this.diddy.energy === undefined || isNaN(this.diddy.energy)) this.diddy.energy = 40;
+            if (this.diddy.maxEnergy === undefined || isNaN(this.diddy.maxEnergy)) this.diddy.maxEnergy = 40;
+            if (this.diddy.rechargeRate === undefined || isNaN(this.diddy.rechargeRate)) this.diddy.rechargeRate = 0.2;
             if (this.diddy.lastUpdated === undefined || isNaN(this.diddy.lastUpdated)) this.diddy.lastUpdated = Date.now();
         } else {
             // Default state - Fresh start
-            this.diddy = { count: 0, level: 1, energy: 40, maxEnergy: 100, rechargeRate: 1, lastUpdated: Date.now() };
+            this.diddy = { count: 0, level: 1, energy: 40, maxEnergy: 40, rechargeRate: 0.2, lastUpdated: Date.now() };
         }
 
         // console.log(`Loaded state: ${JSON.stringify(this.diddy)}`);
